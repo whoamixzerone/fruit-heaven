@@ -1,19 +1,71 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { JoinRequestDto } from './dto/join.request.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Repository } from 'typeorm';
+import { Users } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
+  constructor(
+    @InjectRepository(Users)
+    private usersRepository: Repository<Users>,
+  ) {}
+
+  async findByEmail(email): Promise<Users> {
+    return await this.usersRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'password'],
+    });
+  }
+
+  async findByCellphone(cellPhone): Promise<Users> {
+    return await this.usersRepository.findOne({
+      where: { cellPhone },
+      select: ['id', 'cellPhone'],
+    });
+  }
+
+  async findById(id: number): Promise<UserDto> {
+    return await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'email', 'name', 'cellPhone'],
+    });
+  }
+
+  async join({
+    email,
+    password,
+    name,
+    cellPhone,
+  }: {
+    email: string;
+    password: string;
+    name: string;
+    cellPhone: string;
+  }): Promise<boolean> {
+    const user: Users = this.usersRepository.create({
+      email,
+      password,
+      name,
+      cellPhone,
+    });
+    try {
+      await this.usersRepository.save(user);
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      throw err;
+    }
+  }
+
+  create(createUserDto: JoinRequestDto) {
     return 'This action adds a new user';
   }
 
   findAll() {
     return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
