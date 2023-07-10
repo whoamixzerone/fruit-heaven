@@ -13,21 +13,21 @@ export class UsersService {
     private usersRepository: Repository<Users>,
   ) {}
 
-  async findByEmail(email): Promise<Users> {
+  async findByEmail(email: string): Promise<Users | null> {
     return await this.usersRepository.findOne({
       where: { email },
       select: ['id', 'email', 'password'],
     });
   }
 
-  async findByCellphone(cellPhone): Promise<Users> {
+  async findByCellphone(cellPhone: string): Promise<Users | null> {
     return await this.usersRepository.findOne({
       where: { cellPhone },
-      select: ['id', 'cellPhone'],
+      select: ['id', 'email', 'cellPhone'],
     });
   }
 
-  async findById(id: number): Promise<UserDto> {
+  async findById(id: number): Promise<UserDto | null> {
     return await this.usersRepository.findOne({
       where: { id },
       select: ['id', 'email', 'name', 'cellPhone'],
@@ -51,6 +51,7 @@ export class UsersService {
       name,
       cellPhone,
     });
+
     try {
       await this.usersRepository.save(user);
       return true;

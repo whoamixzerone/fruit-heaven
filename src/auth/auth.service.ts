@@ -58,7 +58,7 @@ export class AuthService {
     });
   }
 
-  JwtTokenErrorHandle(info: any): void {
+  jwtTokenErrorHandle(info: any): void {
     const errorMsg = info?.message ?? undefined;
 
     if (info instanceof TokenExpiredError) {

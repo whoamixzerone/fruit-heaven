@@ -10,7 +10,7 @@ export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh-token') {
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (info) {
-      this.authService.JwtTokenErrorHandle(info);
+      this.authService.jwtTokenErrorHandle(info);
     }
 
     return super.handleRequest(err, user, info, context);
