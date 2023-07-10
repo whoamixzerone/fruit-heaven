@@ -5,10 +5,12 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
+  Redirect,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -21,12 +23,14 @@ import { User } from '../common/decorators/user.decorator';
 import { JwtAccessAuthGuard } from 'src/auth/jwt-access-auth.guard';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -80,10 +84,27 @@ export class UsersController {
     return user;
   }
 
-  @Post('/logout')
-  signOut() {
-    // todo : redis refresh_token delete
-    return '';
+  @UseGuards(JwtAccessAuthGuard)
+  @Redirect()
+  @Get('logout')
+  async signOut(
+    @User() user: UserDto,
+  ): Promise<{ url: string; statusCode: HttpStatus }> {
+    const url = `${this.configService.get<string>(
+      'DOMAIN_URL',
+    )}:${this.configService.get<string>('PORT')}`;
+
+    const isToken = this.cacheManager.get(`refresh_token:${user.id}`);
+    if (isToken) {
+      try {
+        await this.cacheManager.del(`refresh_token:${user.id}`);
+      } catch (err: unknown) {
+        console.error(err);
+        throw err;
+      }
+    }
+
+    return { url, statusCode: HttpStatus.MOVED_PERMANENTLY };
   }
 
   @Get()
