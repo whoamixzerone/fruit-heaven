@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Users } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from './dto/user.dto';
+import { UsersRole } from './user-role.enum';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +31,7 @@ export class UsersService {
   async findById(id: number): Promise<UserDto | null> {
     return await this.usersRepository.findOne({
       where: { id },
-      select: ['id', 'email', 'name', 'cellPhone'],
+      select: ['id', 'email', 'name', 'cellPhone', 'role'],
     });
   }
 
@@ -39,17 +40,20 @@ export class UsersService {
     password,
     name,
     cellPhone,
+    role,
   }: {
     email: string;
     password: string;
     name: string;
     cellPhone: string;
+    role: UsersRole;
   }): Promise<boolean> {
     const user: Users = this.usersRepository.create({
       email,
       password,
       name,
       cellPhone,
+      role,
     });
 
     try {

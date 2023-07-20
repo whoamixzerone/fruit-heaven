@@ -18,8 +18,9 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       database: this.configService.get<string>('MYSQL_DATABASE'),
       entities: [__dirname + '/../../**/**/*.entity.{js,ts}'],
       charset: 'utf8mb4_unicode_ci',
-      synchronize: this.configService.get<boolean>('MYSQL_SYNCHRONIZE'),
-      logging: this.configService.get<boolean>('MYSQL_LOGGING'),
+      timezone: 'Z',
+      synchronize: !!this.configService.get<boolean>('MYSQL_SYNCHRONIZE'),
+      logging: !!this.configService.get<boolean>('MYSQL_LOGGING'),
     };
   }
 }

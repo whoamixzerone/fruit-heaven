@@ -8,8 +8,8 @@ import { UserDto } from '../users/dto/user.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(@User() user: UserDto): Promise<{ access_token: string }> {
     const accessToken: string = await this.authService.generateAccessToken(
       user,

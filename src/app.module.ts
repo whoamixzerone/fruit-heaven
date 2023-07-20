@@ -9,6 +9,7 @@ import { TypeOrmConfigModule } from './config/database/typeorm.config.module';
 import { TypeOrmConfigService } from './config/database/typeorm.config.service';
 import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { ProductsModule } from './products/products.module';
 
 const cacheModule = CacheModule.registerAsync({
   imports: [ConfigModule],
@@ -36,6 +37,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     typeOrmModule,
     AuthModule,
     UsersModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -78,15 +78,15 @@ export class UsersController {
     return { access_token: accessToken, refresh_token: refreshToken };
   }
 
-  @UseGuards(JwtAccessAuthGuard)
   @Get('profile')
+  @UseGuards(JwtAccessAuthGuard)
   getProfile(@User() user: UserDto): UserDto {
     return user;
   }
 
+  @Get('logout')
   @UseGuards(JwtAccessAuthGuard)
   @Redirect()
-  @Get('logout')
   async signOut(
     @User() user: UserDto,
   ): Promise<{ url: string; statusCode: HttpStatus }> {
