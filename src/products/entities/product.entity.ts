@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductStatus } from '../product-status.enum';
-import { IsEmpty, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { ProductImages } from './product-images.entity';
 
 @Entity({ name: 'products' })
 export class Products {
@@ -46,4 +48,7 @@ export class Products {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
+
+  @OneToMany(() => ProductImages, (productImage) => productImage.product)
+  productImages: ProductImages[];
 }

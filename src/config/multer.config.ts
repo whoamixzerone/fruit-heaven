@@ -55,7 +55,7 @@ export class MulterConfigService implements MulterOptionsFactory {
     file: Express.Multer.File,
     callback: (error: Error | null, acceptFile: boolean) => void,
   ): void {
-    const fileType: string | RegExp = /(jpg|jpeg|png)$/;
+    const fileType: string | RegExp = /image\/(jpg|jpeg|png)$/;
     const isMimeType = file.mimetype.match(fileType);
     if (!isMimeType) {
       return callback(
@@ -73,7 +73,7 @@ export class MulterConfigService implements MulterOptionsFactory {
     const dirPath = this.dirPath;
     const options: MulterOptions = {
       storage: this.diskStorage(dirPath),
-      fileFilter: this.fileFilter.bind(this),
+      fileFilter: this.fileFilter,
       limits: { fileSize: 10 * 1024 * 1024 },
     };
 

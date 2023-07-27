@@ -33,15 +33,17 @@ export class ProductsService {
         stock,
       });
 
-      const productImages = imageUrl.map((url) => {
-        const productImage = this.productImagesRepository.create();
-        productImage.product = product;
-        productImage.imageUrl = url;
-        return productImage;
-      });
-      await queryRunner.manager
-        .getRepository(ProductImages)
-        .save(productImages);
+      if (imageUrl) {
+        const productImages = imageUrl.map((url) => {
+          const productImage = this.productImagesRepository.create();
+          productImage.product = product;
+          productImage.imageUrl = url;
+          return productImage;
+        });
+        await queryRunner.manager
+          .getRepository(ProductImages)
+          .save(productImages);
+      }
 
       await queryRunner.commitTransaction();
 
@@ -56,42 +58,82 @@ export class ProductsService {
   }
 
   async findAll(queryString: SearchConditionRequestDto): Promise<Products[]> {
-    let title, limit, sorter, orderCol, orderOpt;
+    let title, limit, sorter, orderCol, orderOpt: 'ASC' | 'DESC';
     if (queryString) {
-      title = queryString?.tit;
+      title = queryString?.tit ?? '';
       limit = queryString?.limit ?? 50;
-      sorter = queryString?.sorter ?? SorterCondition.BESTASC;
+      // sorter = queryString?.sorter ?? SorterCondition.BESTASC;
+      // todo : order_items 구현 전까지 임시
+      sorter = queryString?.sorter ?? SorterCondition.LATESTDESC;
     }
 
     const query = this.productsRepository
       .createQueryBuilder('products')
-      .where(title != null ? 'products.title LIKE :title' : 'false', { title })
+      .leftJoinAndSelect('products.productImages', 'image')
+      .select([
+        'products.id',
+        'products.title',
+        'products.content',
+        'products.price',
+        'products.stock',
+        'products.status',
+        'products.createdAt',
+        'image.id',
+        'image.imageUrl',
+      ])
+      .where('products.title LIKE :title', { title: `%${title}%` })
       .take(limit);
 
     // todo : 판매량 order by desc
     //  order_items(주문 상품 테이블) join
-    //  count(product_id) as product_count group by product_id order by product_count
+    //  count(product_id) as product_count group by product_id order by product_count desc
     if (sorter === SorterCondition.BESTASC) {
     } else if (sorter === SorterCondition.SALEPRICEASC) {
       orderCol = 'products.price';
       orderOpt = 'ASC';
-      query.orderBy(`${orderCol}, ${orderOpt}`);
     } else if (sorter === SorterCondition.SALEPRICEDESC) {
       orderCol = 'products.price';
       orderOpt = 'DESC';
-      query.orderBy(`${orderCol}, ${orderOpt}`);
     } else if (sorter === SorterCondition.LATESTDESC) {
       orderCol = 'products.createdAt';
       orderOpt = 'DESC';
-      query.orderBy(`${orderCol}, ${orderOpt}`);
     }
+    query.orderBy(`${orderCol}`, `${orderOpt}`);
 
     return await query.getMany();
   }
 
   async findById(id: number): Promise<Products> {
-    return this.productsRepository.findOne({
-      where: { id },
-    });
+    return await this.productsRepository
+      .createQueryBuilder('products')
+      .leftJoinAndSelect('products.productImages', 'image')
+      .select([
+        'products.id',
+        'products.title',
+        'products.content',
+        'products.price',
+        'products.stock',
+        'products.status',
+        'image.id',
+        'image.imageUrl',
+      ])
+      .where('products.id = :id', { id })
+      .getOne();
+    // return await this.productsRepository.findOne({
+    //   where: { id },
+    //   relations: ['images'],
+    //   select: {
+    //     id: true,
+    //     title: true,
+    //     content: true,
+    //     price: true,
+    //     stock: true,
+    //     status: true,
+    //     images: {
+    //       id: true,
+    //       imageUrl: true,
+    //     },
+    //   },
+    // });
   }
 }

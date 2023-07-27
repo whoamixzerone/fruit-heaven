@@ -30,7 +30,10 @@ export class ProductImages {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Products, (product) => product.images)
+  @ManyToOne(() => Products, (product) => product.productImages, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'product_id', referencedColumnName: 'id' }])
   product: Products;
 }

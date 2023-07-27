@@ -49,6 +49,7 @@ describe('UsersService', () => {
         password: '1234',
         name: '홍길동',
         cellPhone: '01011112222',
+        role: UsersRole.USER,
       };
       now = new Date();
       saveUser = {
