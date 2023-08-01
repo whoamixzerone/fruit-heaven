@@ -6,6 +6,7 @@ import { Products } from './entities/product.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateProductRequestDto } from './dto/create-product.request.dto';
 import { ProductImages } from './entities/product-images.entity';
+import { UpdateProductRequestDto } from './dto/update-product.request.dto';
 
 @Injectable()
 export class ProductsService {
@@ -135,5 +136,27 @@ export class ProductsService {
     //     },
     //   },
     // });
+  }
+
+  async updateProduct(
+    id: number,
+    updateProductRequestDto: UpdateProductRequestDto,
+  ): Promise<boolean> {
+    const product = Object.fromEntries(
+      Object.entries(updateProductRequestDto).filter(
+        ([key, value]) => value !== undefined,
+      ),
+    );
+
+    try {
+      const result = await this.productsRepository.update(id, product);
+      if (result.affected === 0) {
+        return false;
+      }
+
+      return true;
+    } catch (err: unknown) {
+      throw err;
+    }
   }
 }

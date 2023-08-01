@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductStatus } from '../product-status.enum';
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive, IsString } from 'class-validator';
 import { ProductImages } from './product-images.entity';
 
 @Entity({ name: 'products' })
@@ -24,8 +24,7 @@ export class Products {
   @Column('text', { name: 'product_content', nullable: true })
   content: string;
 
-  @IsInt()
-  @IsNotEmpty()
+  @IsPositive()
   @Column('decimal', { precision: 11, scale: 0 })
   price: number;
 

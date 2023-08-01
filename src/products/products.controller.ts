@@ -3,8 +3,10 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UploadedFiles,
@@ -17,6 +19,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateProductRequestDto } from './dto/create-product.request.dto';
 import { Products } from './entities/product.entity';
 import { SearchConditionRequestDto } from './dto/search-condition.request.dto';
+import { UpdateProductRequestDto } from './dto/update-product.request.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -37,10 +40,12 @@ export class ProductsController {
 
   @Post()
   @Authorization([UsersRole.ADMIN])
-  createProduct(
+  async createProduct(
     @Body() createProductRequestDto: CreateProductRequestDto,
-  ): string {
-    const result = this.productsService.createProduct(createProductRequestDto);
+  ): Promise<string> {
+    const result = await this.productsService.createProduct(
+      createProductRequestDto,
+    );
     if (result) {
       return 'ok';
     } else {
@@ -56,7 +61,29 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findProduct(@Param('id', ParseIntPipe) id: number): Promise<Products> {
-    return this.productsService.findById(id);
+  async findProduct(@Param('id', ParseIntPipe) id: number): Promise<Products> {
+    return await this.productsService.findById(id);
+  }
+
+  @Patch(':id')
+  @Authorization([UsersRole.ADMIN])
+  async updateProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductRequestDto: UpdateProductRequestDto,
+  ) {
+    const product = await this.productsService.findById(id);
+    if (!product) {
+      throw new NotFoundException('해당 상품이 존재하지 않습니다.');
+    }
+
+    const result = await this.productsService.updateProduct(
+      id,
+      updateProductRequestDto,
+    );
+    if (result) {
+      return 'ok';
+    } else {
+      throw new NotFoundException('해당 상품이 존재하지 않습니다.');
+    }
   }
 }
