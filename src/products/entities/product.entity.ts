@@ -48,6 +48,8 @@ export class Products {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
 
-  @OneToMany(() => ProductImages, (productImage) => productImage.product)
+  @OneToMany(() => ProductImages, (productImage) => productImage.product, {
+    cascade: ['soft-remove'],
+  })
   productImages: ProductImages[];
 }

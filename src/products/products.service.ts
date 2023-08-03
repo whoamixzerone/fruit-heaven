@@ -18,6 +18,10 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) {}
 
+  async hasProductById(id: number): Promise<Products> {
+    return await this.productsRepository.findOne({ where: { id } });
+  }
+
   async createProduct(
     createProductRequestDto: CreateProductRequestDto,
   ): Promise<boolean> {
@@ -122,7 +126,7 @@ export class ProductsService {
       .getOne();
     // return await this.productsRepository.findOne({
     //   where: { id },
-    //   relations: ['images'],
+    //   relations: ['productImages'],
     //   select: {
     //     id: true,
     //     title: true,
@@ -130,7 +134,7 @@ export class ProductsService {
     //     price: true,
     //     stock: true,
     //     status: true,
-    //     images: {
+    //     productImages: {
     //       id: true,
     //       imageUrl: true,
     //     },
@@ -142,17 +146,24 @@ export class ProductsService {
     id: number,
     updateProductRequestDto: UpdateProductRequestDto,
   ): Promise<boolean> {
-    const product = Object.fromEntries(
-      Object.entries(updateProductRequestDto).filter(
-        ([key, value]) => value !== undefined,
-      ),
-    );
-
     try {
-      const result = await this.productsRepository.update(id, product);
+      const result = await this.productsRepository.update(
+        id,
+        updateProductRequestDto,
+      );
       if (result.affected === 0) {
         return false;
       }
+
+      return true;
+    } catch (err: unknown) {
+      throw err;
+    }
+  }
+
+  async deleteProduct(product: Products): Promise<boolean> {
+    try {
+      await this.productsRepository.softRemove(product);
 
       return true;
     } catch (err: unknown) {

@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   NotFoundException,
@@ -31,6 +33,10 @@ export class ProductsController {
   uploadFile(@UploadedFiles() files: Array<Express.Multer.File>): {
     imageUrl: string[];
   } {
+    if (!files) {
+      throw new BadRequestException('하나 이상의 파일을 업로드 하셔야 합니다.');
+    }
+
     const imageUrl = files.map((file) => {
       return file.path;
     });
@@ -71,7 +77,7 @@ export class ProductsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductRequestDto: UpdateProductRequestDto,
   ) {
-    const product = await this.productsService.findById(id);
+    const product = await this.productsService.hasProductById(id);
     if (!product) {
       throw new NotFoundException('해당 상품이 존재하지 않습니다.');
     }
@@ -83,7 +89,23 @@ export class ProductsController {
     if (result) {
       return 'ok';
     } else {
+      throw new BadRequestException();
+    }
+  }
+
+  @Delete(':id')
+  @Authorization([UsersRole.ADMIN])
+  async deleteProduct(@Param('id', ParseIntPipe) id: number): Promise<string> {
+    const product = await this.productsService.findById(id);
+    if (!product) {
       throw new NotFoundException('해당 상품이 존재하지 않습니다.');
+    }
+
+    const result = await this.productsService.deleteProduct(product);
+    if (result) {
+      return 'ok';
+    } else {
+      throw new BadRequestException();
     }
   }
 }
