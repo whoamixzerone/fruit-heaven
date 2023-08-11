@@ -7,5 +7,5 @@ export class CreateProductRequestDto extends PickType(Products, [
   'price',
   'stock',
 ] as const) {
-  imageUrl: string[];
+  imageUrl?: string[];
 }

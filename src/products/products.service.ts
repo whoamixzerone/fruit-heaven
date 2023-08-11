@@ -19,7 +19,10 @@ export class ProductsService {
   ) {}
 
   async hasProductById(id: number): Promise<Products> {
-    return await this.productsRepository.findOne({ where: { id } });
+    return await this.productsRepository.findOne({
+      where: { id },
+      select: ['id'],
+    });
   }
 
   async createProduct(
@@ -31,17 +34,19 @@ export class ProductsService {
     await queryRunner.startTransaction();
 
     try {
-      const product = await queryRunner.manager.getRepository(Products).save({
-        title,
-        content,
-        price,
-        stock,
-      });
+      const product: Products = await queryRunner.manager
+        .getRepository(Products)
+        .save({
+          title,
+          content,
+          price,
+          stock,
+        });
 
       if (imageUrl) {
         const productImages = imageUrl.map((url) => {
           const productImage = this.productImagesRepository.create();
-          productImage.product = product;
+          productImage.ProductId = product.id;
           productImage.imageUrl = url;
           return productImage;
         });
@@ -74,7 +79,7 @@ export class ProductsService {
 
     const query = this.productsRepository
       .createQueryBuilder('products')
-      .leftJoinAndSelect('products.productImages', 'image')
+      .leftJoin('products.productImages', 'image')
       .select([
         'products.id',
         'products.title',
@@ -111,7 +116,7 @@ export class ProductsService {
   async findById(id: number): Promise<Products> {
     return await this.productsRepository
       .createQueryBuilder('products')
-      .leftJoinAndSelect('products.productImages', 'image')
+      .leftJoin('products.productImages', 'image')
       .select([
         'products.id',
         'products.title',
