@@ -45,7 +45,9 @@ export class ProductsService {
 
       if (imageUrl) {
         const productImages = imageUrl.map((url) => {
-          const productImage = this.productImagesRepository.create();
+          const productImage = queryRunner.manager
+            .getRepository(ProductImages)
+            .create();
           productImage.ProductId = product.id;
           productImage.imageUrl = url;
           return productImage;
@@ -162,6 +164,7 @@ export class ProductsService {
 
       return true;
     } catch (err: unknown) {
+      console.error(err);
       throw err;
     }
   }
@@ -172,6 +175,7 @@ export class ProductsService {
 
       return true;
     } catch (err: unknown) {
+      console.error(err);
       throw err;
     }
   }

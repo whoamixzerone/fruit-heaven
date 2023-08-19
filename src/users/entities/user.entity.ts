@@ -4,6 +4,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,6 +19,8 @@ import {
   Length,
   MinLength,
 } from 'class-validator';
+import { Products } from '../../products/entities/product.entity';
+import { Carts } from '../../carts/entities/cart.entity';
 
 @Entity({ name: 'users' })
 export class Users {
@@ -65,6 +70,23 @@ export class Users {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
+
+  @OneToMany(() => Carts, (cart) => cart.User)
+  Carts: Carts[];
+
+  @ManyToMany(() => Products, (product) => product.Users)
+  @JoinTable({
+    name: 'carts',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+  })
+  Products: Products[];
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {
