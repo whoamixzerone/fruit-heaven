@@ -179,4 +179,11 @@ export class ProductsService {
       throw err;
     }
   }
+
+  async getStock(id: number) {
+    return await this.productsRepository.findOne({
+      where: { id },
+      select: ['stock'],
+    });
+  }
 }

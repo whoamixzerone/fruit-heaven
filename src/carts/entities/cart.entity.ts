@@ -1,40 +1,29 @@
 import {
-  Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryColumn,
-  UpdateDateColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { Products } from '../../products/entities/product.entity';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { CartProducts } from './cart-products.entity';
 
 @Entity({ name: 'carts' })
 export class Carts {
+  @PrimaryGeneratedColumn({ name: 'cart_id' })
+  id: number;
+
   @PrimaryColumn({ name: 'user_id' })
   UserId: number;
 
-  @PrimaryColumn({ name: 'product_id' })
-  ProductId: number;
-
-  @IsInt()
-  @IsNotEmpty()
-  @Column()
-  quantity: number;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  @ManyToOne(() => Users, (user) => user.Carts)
+  @OneToOne(() => Users, (user) => user.Cart)
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   User: Users;
 
-  @ManyToOne(() => Products, (product) => product.Carts)
-  @JoinColumn([{ name: 'product_id', referencedColumnName: 'id' }])
-  Product: Products;
+  @OneToMany(() => CartProducts, (cartProduct) => cartProduct.Cart, {
+    cascade: ['remove'],
+    orphanedRowAction: 'delete',
+  })
+  CartProducts: CartProducts[];
 }

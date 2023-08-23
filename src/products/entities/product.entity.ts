@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -11,8 +10,7 @@ import {
 import { ProductStatus } from '../product-status.enum';
 import { IsInt, IsNotEmpty, IsPositive, IsString } from 'class-validator';
 import { ProductImages } from './product-images.entity';
-import { Users } from '../../users/entities/user.entity';
-import { Carts } from '../../carts/entities/cart.entity';
+import { CartProducts } from '../../carts/entities/cart-products.entity';
 
 @Entity({ name: 'products' })
 export class Products {
@@ -56,9 +54,6 @@ export class Products {
   })
   productImages: ProductImages[];
 
-  @OneToMany(() => Carts, (cart) => cart.Product)
-  Carts: Carts[];
-
-  @ManyToMany(() => Users, (user) => user.Products)
-  Users: Users[];
+  @OneToMany(() => CartProducts, (cartProduct) => cartProduct.Product)
+  CartProducts: CartProducts[];
 }
