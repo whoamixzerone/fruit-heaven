@@ -63,7 +63,7 @@ describe('UsersService', () => {
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
-      };
+      } as Users;
     });
 
     it('join 함수 존재', () => {

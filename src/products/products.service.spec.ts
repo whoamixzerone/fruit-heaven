@@ -146,7 +146,7 @@ describe('ProductsService', () => {
         updatedAt: date,
         deletedAt: null,
         productImages: [],
-      };
+      } as Products;
       productImages = imageUrl.map((url) => {
         const productImage = {
           ProductId: product.id,
@@ -252,7 +252,7 @@ describe('ProductsService', () => {
         updatedAt: now,
         deletedAt: null,
         productImages: [],
-      };
+      } as Products;
     });
 
     it('상품 조회 성공 시 배열 반환', async () => {
@@ -301,7 +301,7 @@ describe('ProductsService', () => {
         updatedAt: now,
         deletedAt: null,
         productImages: [],
-      };
+      } as Products;
     });
 
     it('상품 조회 성공 시 Products 반환', async () => {
@@ -402,7 +402,7 @@ describe('ProductsService', () => {
         updatedAt: now,
         deletedAt: null,
         productImages: [],
-      };
+      } as Products;
     });
 
     it('상품 삭제 성공 시 true 반환', async () => {

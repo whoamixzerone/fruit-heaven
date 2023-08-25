@@ -1,7 +1,7 @@
 import { PickType } from '@nestjs/mapped-types';
-import { Carts } from '../entities/cart.entity';
+import { CartProducts } from '../entities/cart-products.entity';
 
-export class CreateCartRequestDto extends PickType(Carts, [
+export class CreateCartRequestDto extends PickType(CartProducts, [
   'ProductId',
   'quantity',
 ] as const) {}
