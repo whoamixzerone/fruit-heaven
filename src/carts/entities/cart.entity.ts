@@ -23,7 +23,7 @@ export class Carts {
 
   @OneToMany(() => CartProducts, (cartProduct) => cartProduct.Cart, {
     cascade: ['remove'],
-    orphanedRowAction: 'delete',
+    // orphanedRowAction: 'delete',
   })
   CartProducts: CartProducts[];
 }

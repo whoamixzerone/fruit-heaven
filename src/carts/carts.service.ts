@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Carts } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartResponseDto } from './dto/cart.response.dto';
@@ -14,6 +14,10 @@ export class CartsService {
     @InjectRepository(CartProducts)
     private readonly cartProductsRepository: Repository<CartProducts>,
   ) {}
+
+  async findCartById(id: number): Promise<Carts> {
+    return await this.cartsRepository.findOne({ where: { id } });
+  }
 
   async findCartByUserId(UserId: number): Promise<Carts> {
     return await this.cartsRepository.findOne({ where: { UserId } });
@@ -142,5 +146,35 @@ export class CartsService {
       console.error(err);
       throw err;
     }
+  }
+
+  async deleteCarts(id: number) {
+    const result = await this.cartsRepository.delete({ id: id });
+    if (result.affected === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async deleteCartProducts(CartId: number, ProductIds: number[]) {
+    const result = await this.cartProductsRepository.delete({
+      CartId: CartId,
+      ProductId: In(ProductIds),
+    });
+    if (result.affected === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async validNotSessionIdAndCartUserId(
+    userId: number,
+    cartId: number,
+  ): Promise<boolean> {
+    const cart = await this.findCartById(cartId);
+
+    return userId !== cart.UserId;
   }
 }

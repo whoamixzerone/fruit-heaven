@@ -78,12 +78,6 @@ export class UsersController {
     return { access_token: accessToken, refresh_token: refreshToken };
   }
 
-  @Get('profile')
-  @UseGuards(JwtAccessAuthGuard)
-  getProfile(@User() user: UserDto): UserDto {
-    return user;
-  }
-
   @Get('logout')
   @UseGuards(JwtAccessAuthGuard)
   @Redirect()

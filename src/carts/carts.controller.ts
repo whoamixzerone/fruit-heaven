@@ -2,8 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseArrayPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -13,7 +15,7 @@ import { CartsService } from './carts.service';
 import { User } from '../common/decorators/user.decorator';
 import { Users } from '../users/entities/user.entity';
 import { JwtAccessAuthGuard } from '../auth/jwt-access-auth.guard';
-import { CreateCartRequestDto } from './dto/create-cart.request.dto';
+import { CartRequestDto } from './dto/cart.request.dto';
 import { CartResponseDto } from './dto/cart.response.dto';
 import { ProductsService } from '../products/products.service';
 
@@ -28,7 +30,7 @@ export class CartsController {
   @Post()
   async createCart(
     @User() user: Users,
-    @Body() createCartRequestDto: CreateCartRequestDto,
+    @Body() createCartRequestDto: CartRequestDto,
   ): Promise<string> {
     const { ProductId, quantity } = createCartRequestDto;
     let cart;
@@ -58,7 +60,7 @@ export class CartsController {
         );
 
     if (!result) {
-      throw new BadRequestException();
+      throw new BadRequestException('장바구니에 상품을 추가할 수 없습니다.');
     }
 
     return 'ok';
@@ -79,9 +81,14 @@ export class CartsController {
   async updateCart(
     @User() user: Users,
     @Param('id', ParseIntPipe) id: number,
-    @Body() createCartRequestDto: CreateCartRequestDto,
+    @Body() cartRequestDto: CartRequestDto,
   ): Promise<CartResponseDto[]> {
-    const { ProductId, quantity } = createCartRequestDto;
+    if (await this.cartsService.validNotSessionIdAndCartUserId(user.id, id)) {
+      // 로그인 한 고객 id와 수정할 장바구니의 고객 id가 일치하는지 확인
+      throw new BadRequestException('장바구니가 일치하지 않습니다.');
+    }
+
+    const { ProductId, quantity } = cartRequestDto;
 
     const product = await this.productsService.getStock(ProductId);
     if (product.stock < quantity) {
@@ -94,10 +101,32 @@ export class CartsController {
       quantity,
     );
     if (!result) {
-      throw new BadRequestException();
+      throw new BadRequestException('상품 수량을 추가할 수 없습니다.');
     }
 
     const cartProducts = await this.cartsService.findCartProductsByCartId(id); // 업데이트 후 전체 조회
     return CartResponseDto.toModel(cartProducts);
+  }
+
+  @Delete(':id')
+  async deleteCart(
+    @User() user: Users,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('ProductIds', ParseArrayPipe) ProductIds: number[],
+  ) {
+    if (await this.cartsService.validNotSessionIdAndCartUserId(user.id, id)) {
+      // 로그인 한 고객 id와 삭제할 장바구니의 고객 id가 일치하는지 확인
+      throw new BadRequestException('장바구니가 일치하지 않습니다.');
+    }
+
+    const result =
+      ProductIds.length === 0
+        ? await this.cartsService.deleteCarts(id) // 장바구니 전체 삭제
+        : await this.cartsService.deleteCartProducts(id, ProductIds); // 장바구니 일부 삭제
+    if (result) {
+      return 'ok';
+    } else {
+      throw new BadRequestException('해당 상품을 삭제할 수 없습니다.');
+    }
   }
 }
